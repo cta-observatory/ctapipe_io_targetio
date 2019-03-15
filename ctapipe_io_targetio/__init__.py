@@ -18,7 +18,6 @@ __all__ = [
 ]
 
 
-
 class TargetIOEventSource(EventSource):
     """
     EventSource for the targetio unofficial data format, the data

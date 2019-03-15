@@ -1,6 +1,5 @@
 from ctapipe.utils.datasets import get_dataset_path
 from numpy.testing import assert_array_equal, assert_array_almost_equal
-import pytest
 
 
 def test_targetio_calibrator():
@@ -28,13 +27,8 @@ def test_targetio_calibrator():
         pedestal_path=pedpath
     )
     r1c.calibrate(event_r0)
-    assert_array_almost_equal(event_r0.r1.tel[0].waveform,
-                              event_r1.r1.tel[0].waveform, 1)
-
-
-def test_targetio_calibrator_wrong_file(example_event):
-    from ctapipe_io_targetio import TargetIOR1Calibrator
-
-    r1c = TargetIOR1Calibrator()
-    with pytest.raises(ValueError):
-        r1c.calibrate(example_event)
+    assert_array_almost_equal(
+        event_r0.r1.tel[0].waveform,
+        event_r1.r1.tel[0].waveform,
+        1,
+    )
