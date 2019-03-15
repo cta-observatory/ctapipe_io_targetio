@@ -1,14 +1,12 @@
 import copy
 import pytest
-from ctapipe.io.targetioeventsource import TargetIOEventSource
 from ctapipe.io import event_source
 from ctapipe.io.eventseeker import EventSeeker
 from ctapipe.utils import get_dataset_path
 from ctapipe.calib.camera.calibrator import CameraCalibrator
 
-pytest.importorskip("target_driver")
-pytest.importorskip("target_io")
-pytest.importorskip("target_calib")
+
+from ctapipe_io_targetio import TargetIOEventSource
 
 
 def test_chec_r1():

@@ -1,0 +1,35 @@
+channels:
+  - default
+  - cta-observatory
+  - conda-forge
+dependencies:
+  - python=3.6 # nail the python version, so conda does not try upgrading / dowgrading
+  - zeromq
+  - swig
+  - cfitsio
+  - astropy
+  - bokeh
+  - cython
+  - gammapy
+  - h5py
+  - iminuit
+  - ipython
+  - ipywidgets
+  - jupyter
+  - matplotlib
+  - numba
+  - numpy>=1.15.4
+  - numpydoc
+  - pandas
+  - pytest
+  - scikit-learn
+  - scipy
+  - pyyaml
+  - pytables
+  - zlib
+  - gcc_linux-64
+  - gxx_linux-64
+  - ctapipe-extra=0.2
+  - pip:
+      - pytest_runner
+      - https://github.com/cta-observatory/ctapipe-extra/archive/v0.2.17.tar.gz

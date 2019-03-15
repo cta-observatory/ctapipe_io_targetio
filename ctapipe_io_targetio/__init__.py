@@ -1,9 +1,15 @@
 import numpy as np
 from astropy import units as u
 from astropy.time import Time
+
 from ctapipe.instrument import TelescopeDescription
 from ctapipe.io.eventsource import EventSource
-from ctapipe.io.containers import TargetIODataContainer
+
+from target_io import WaveformArrayReader
+from target_calib import CameraConfiguration
+
+from .containers import TargetIODataContainer
+
 
 __all__ = ['TargetIOEventSource']
 
@@ -48,19 +54,6 @@ class TargetIOEventSource(EventSource):
 
     def __init__(self, config=None, parent=None, **kwargs):
         super().__init__(config=config, parent=parent, **kwargs)
-        try:
-            import target_driver
-            import target_io
-            import target_calib
-        except ImportError:
-            msg = ("Cannot find TARGET libraries, please follow installation "
-                   "instructions from https://forge.in2p3.fr/projects/gct/"
-                   "wiki/Installing_CHEC_Software")
-            self.log.error(msg)
-            raise
-
-        self._waveform_array_reader = target_io.WaveformArrayReader
-        self._config_constr = target_calib.CameraConfiguration
 
         self._data = None
         self._event_index = None
@@ -69,7 +62,7 @@ class TargetIOEventSource(EventSource):
         self._time_sec = None
         self._time_ns = None
 
-        self._reader = self._waveform_array_reader(self.input_url, 2, 1)
+        self._reader = WaveformArrayReader(self.input_url, 2, 1)
 
         self._n_events = self._reader.fNEvents
         self._first_event_id = self._reader.fFirstEventID
@@ -78,7 +71,7 @@ class TargetIOEventSource(EventSource):
         n_modules = self._reader.fNModules
         n_pix = self._reader.fNPixels
         n_samples = self._reader.fNSamples
-        self.camera_config = self._config_constr(self._reader.fCameraVersion)
+        self.camera_config = CameraConfiguration(self._reader.fCameraVersion)
         self._n_cells = self.camera_config.GetNCells()
         m = self.camera_config.GetMapping(n_modules == 1)
 
