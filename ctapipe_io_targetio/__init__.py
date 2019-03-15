@@ -9,9 +9,14 @@ from target_io import WaveformArrayReader
 from target_calib import CameraConfiguration
 
 from .containers import TargetIODataContainer
+from .calibration import TargetIOR1Calibrator
 
 
-__all__ = ['TargetIOEventSource']
+__all__ = [
+    'TargetIOEventSource',
+    'TargetIOR1Calibrator',
+]
+
 
 
 class TargetIOEventSource(EventSource):
