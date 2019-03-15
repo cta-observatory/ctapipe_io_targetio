@@ -1,4 +1,4 @@
-from ctapipe.io import CameraR1Calibrator
+from ctapipe.calib import CameraR1Calibrator
 from traitlets import Unicode
 import numpy as np
 
