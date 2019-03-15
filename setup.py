@@ -17,7 +17,6 @@ setup(
     install_requires=[
         'astropy',
         'ctapipe',
-        'protozfits',
     ],
     tests_require=['pytest'],
     setup_requires=['pytest_runner'],
