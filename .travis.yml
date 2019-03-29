@@ -1,17 +1,15 @@
-language: generic
-
-env:
-  global:
-    - TARGET_SOFTWARE=$HOME/Software/target_software
-    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/Software/TargetDriver/install/lib:$HOME/Software/TargetIO/install/lib:$HOME/Software/TargetCalib/install/lib
-    - TARGETCALIBPATH=$HOME/Software/TargetCalib/install
+sudo: required
 
 matrix:
   include:
     - os: linux
+      python: 3.6
       env:
-        - TRAVIS_PYTHON_VERSION=3.6
-        - CTAPIPE_VERSION=master
+        - PYTHON_VERSION=3.6
+    - os: linux
+      python: 3.7
+      env:
+        - PYTHON_VERSION=3.7
 
 
 before_install:
@@ -27,8 +25,8 @@ before_install:
     - conda info -a # Useful for debugging any issues with conda
 
 install:
-    - conda create --name travis python=$TRAVIS_PYTHON_VERSION
-    - travis_wait 20 conda env update -n travis --file py${TRAVIS_PYTHON_VERSION}_env.yaml
+    - conda create --name travis python=$PYTHON_VERSION
+    - travis_wait 20 conda env update -n travis --file py${PYTHON_VERSION}_env.yaml
     - conda activate travis
 
     # install target software
@@ -41,6 +39,7 @@ install:
     - cd $TRAVIS_BUILD_DIR
     
     # we install ctapipe using pip to be able to select any commit, e.g. the current master
+    - export CTAPIPE_VERSION=master
     - pip install https://github.com/cta-observatory/ctapipe/archive/$CTAPIPE_VERSION.tar.gz
     - pip install -e .
 
