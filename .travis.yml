@@ -24,24 +24,27 @@ before_install:
     - conda update -q conda  # get latest conda version
     - conda info -a # Useful for debugging any issues with conda
 
-install:
     - conda create --name travis python=$PYTHON_VERSION
     - travis_wait 20 conda env update -n travis --file py${PYTHON_VERSION}_env.yaml
     - conda activate travis
 
-    # install target software
-
+    # ----- target_software
+    - conda install -c conda-forge cfitsio
+    - conda install swig
     - mkdir -p $HOME/Software
     - cd $HOME/Software
     - git clone https://github.com/watsonjj/target_software.git
-    - cd $TARGET_SOFTWARE
+    - cd target_software
     - ./install.sh
     - cd $TRAVIS_BUILD_DIR
-    
+    # ----- end of target_software
+
     # we install ctapipe using pip to be able to select any commit, e.g. the current master
     - export CTAPIPE_VERSION=master
     - pip install https://github.com/cta-observatory/ctapipe/archive/$CTAPIPE_VERSION.tar.gz
+
+install:
     - pip install -e .
 
 script:
-    - pytest -v
+    - pytest -vvs
