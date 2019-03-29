@@ -1,8 +1,11 @@
 import numpy as np
 from astropy import units as u
+from astropy.coordinates import Angle
 from astropy.time import Time
 
-from ctapipe.instrument import TelescopeDescription
+from ctapipe.instrument.guess import guess_telescope
+from ctapipe.instrument import TelescopeDescription, CameraGeometry, \
+    OpticsDescription, SubarrayDescription
 from ctapipe.io.eventsource import EventSource
 
 from target_io import WaveformArrayReader
@@ -79,8 +82,11 @@ class TargetIOEventSource(EventSource):
         self._n_cells = self.camera_config.GetNCells()
         m = self.camera_config.GetMapping(n_modules == 1)
 
-        self._optical_foclen = 2.283
-        self._pixel_pos = np.vstack([m.GetXPixVector(), m.GetYPixVector()])
+        self._optical_foclen = u.Quantity(2.15, u.m)
+        self._mirror_area = u.Quantity(14.126, u.m ** 2)
+        self._n_pixels = m.GetNPixels()
+        self._xpix = np.array(m.GetXPixVector()) * u.m
+        self._ypix = np.array(m.GetYPixVector()) * u.m
         self._refshape = np.zeros(10)  # TODO: Get correct values for CHEC-S
         self._refstep = 0  # TODO: Get correct values for CHEC-S
         self._time_slice = 0  # TODO: Get correct values for CHEC-S
@@ -129,10 +135,41 @@ class TargetIOEventSource(EventSource):
         data.meta['max_events'] = self.max_events
 
         # Instrument information
-        pix_pos = self._pixel_pos * u.m
-        foclen = self._optical_foclen * u.m
-        teldesc = TelescopeDescription.guess(*pix_pos, foclen)
-        data.inst.subarray.tels[chec_tel] = teldesc
+
+        camera = CameraGeometry(
+            "CHEC",
+            pix_id=np.arange(self._n_pixels),
+            pix_x=self._xpix,
+            pix_y=self._ypix,
+            pix_area=None,
+            pix_type='rectangular',
+        )
+
+        optics = OpticsDescription(
+            name="ASTRI",
+            num_mirrors=2,
+            equivalent_focal_length=self._optical_foclen,
+            mirror_area=self._mirror_area,
+            num_mirror_tiles=2,
+        )
+
+        tel_descriptions = {
+            chec_tel: TelescopeDescription(
+                name="ASTRI",
+                type="SST",
+                camera=camera,
+                optics=optics,
+            )
+        }
+        tel_positions = {
+            chec_tel: u.Quantity(0, u.m)
+        }
+
+        data.inst.subarray =SubarrayDescription(
+            "CHECMonoArray",
+            tel_positions=tel_positions,
+            tel_descriptions=tel_descriptions,
+        )
 
         self._data = data
 
