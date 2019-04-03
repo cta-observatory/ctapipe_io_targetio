@@ -32,3 +32,14 @@ def test_targetio_calibrator():
         event_r1.r1.tel[0].waveform,
         1,
     )
+
+
+def test_import():
+    import subprocess
+    try:
+        subprocess.check_output(
+            'python -c "from ctapipe.calib import CameraR1Calibrator"',
+            shell=True,
+        )
+    except subprocess.CalledProcessError:
+        raise ImportError
