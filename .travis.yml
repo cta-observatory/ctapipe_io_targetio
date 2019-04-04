@@ -13,20 +13,42 @@ matrix:
 
 
 before_install:
+
+    # Use utf8 encoding. Should be default, but this is insurance
+    # against future changes
+
     - export PYTHONIOENCODING=UTF8
     - export MPLBACKEND=Agg
 
-    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    # Install miniconda following instructions at
+    # http://conda.pydata.org/docs/travis.html
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
+      fi
     - bash miniconda.sh -b -p $HOME/miniconda
-    - . $HOME/miniconda/etc/profile.d/conda.sh
+    - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
     - conda config --set always_yes yes --set changeps1 no
     - conda update -q conda  # get latest conda version
-    - conda info -a # Useful for debugging any issues with conda
+    # Useful for debugging any issues with conda
+    - conda info -a
+    - git fetch --tags
+
+    - mkdir -p $HOME/Software
+    - cd $HOME/Software
+    - git clone https://github.com/cta-observatory/ctapipe.git
+    - cd ctapipe
 
     - conda create --name travis python=$PYTHON_VERSION
     - travis_wait 20 conda env update -n travis --file py${PYTHON_VERSION}_env.yaml
-    - conda activate travis
+    - source activate travis
+    - ulimit -s 16000  # increase stack size limit, for libhessio
+    - pip install travis-sphinx
+    - pip install codecov
+    - python setup.py develop
 
     # ----- target_software
     - conda install -c conda-forge cfitsio
@@ -39,9 +61,9 @@ before_install:
     - cd $TRAVIS_BUILD_DIR
     # ----- end of target_software
 
-    # we install ctapipe using pip to be able to select any commit, e.g. the current master
-    - export CTAPIPE_VERSION=master
-    - pip install https://github.com/cta-observatory/ctapipe/archive/$CTAPIPE_VERSION.tar.gz
+#    # we install ctapipe using pip to be able to select any commit, e.g. the current master
+#    - export CTAPIPE_VERSION=master
+#    - pip install https://github.com/cta-observatory/ctapipe/archive/$CTAPIPE_VERSION.tar.gz
 
 install:
     - pip install -e .
